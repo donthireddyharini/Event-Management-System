@@ -1,0 +1,11 @@
+# Database connection files
+# admin/db_connect.php
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Temporary files
+*.log
+*.tmp
