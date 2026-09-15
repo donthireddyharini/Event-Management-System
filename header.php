@@ -25,13 +25,11 @@
 
     <script type="text/javascript" src="admin/assets/js/jquery.datetimepicker.full.min.js"></script>
 
-        <!-- Google Identity Services — loaded early so it's ready when modal opens -->
+        <!-- Google Identity Services -->
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <script>
-        // Pending action after login (e.g. open booking or registration)
         var _pendingAction = null;
 
-        // Called by Google GSI after user picks account
         function handleGoogleAuth(response) {
             try {
                 var base64Url = response.credential.split('.')[1];
@@ -40,70 +38,117 @@
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join(''));
                 var userData = JSON.parse(jsonPayload);
-                // Send to server to create/fetch session
+                start_load();
                 $.post('user_auth.php', {action:'google_login', name:userData.name, email:userData.email}, function(resp){
-                    var r = JSON.parse(resp);
-                    if(r.status == 1){ onUserLoggedIn(r); }
+                    end_load();
+                    try {
+                        var r = JSON.parse(resp);
+                        if(r.status == 1){ 
+                            onUserLoggedIn(r); 
+                        } else {
+                            if(typeof alert_toast === 'function') alert_toast('Google login failed', 'danger');
+                        }
+                    } catch(e) {
+                        console.error('Parse error:', e);
+                    }
                 });
-            } catch(e){ console.error('Google auth error:', e); }
+            } catch(e){ 
+                console.error('Google auth decode error:', e); 
+            }
         }
 
-        // Also used for registration form field fill (backward compat)
-        function handleGoogleSignIn(response) { handleGoogleAuth(response); }
+        function handleGoogleSignIn(response) { 
+            handleGoogleAuth(response); 
+        }
 
-        // Called after any successful login (Google or email)
         function onUserLoggedIn(user) {
-            $('#uni_modal').modal('hide');
-            // Update navbar to show logged-in user
             updateUserNav(user.name, user.email);
-            if(typeof alert_toast === 'function')
+            if(typeof alert_toast === 'function') {
                 alert_toast('Welcome, ' + user.name + '!', 'success');
-            // Execute pending action (book/register)
+            }
             if(_pendingAction) {
-                setTimeout(function(){ _pendingAction(); _pendingAction = null; }, 400);
+                var action = _pendingAction;
+                _pendingAction = null;
+                $('#uni_modal').one('hidden.bs.modal', function(){
+                    setTimeout(function(){ action(); }, 150);
+                });
+                $('#uni_modal').modal('hide');
+            } else {
+                $('#uni_modal').modal('hide');
             }
         }
 
-        // Update nav to show logged-in state
         function updateUserNav(name, email) {
-            var $btn = $('#user_nav_btn');
-            if($btn.length) {
-                $btn.html('<i class="fa fa-user"></i> ' + name)
-                    .removeClass('btn-outline-light')
-                    .addClass('btn-light');
+            var $container = $('#nav_user_container');
+            if($container.length) {
+                $container.html(
+                    '<li class="nav-item dropdown">' +
+                    '<a class="nav-link dropdown-toggle text-white" href="#" id="userNavDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                    '<i class="fa fa-user-circle mr-1"></i> ' + $('<div>').text(name).html() +
+                    '</a>' +
+                    '<div class="dropdown-menu dropdown-menu-right" aria-labelledby="userNavDropdown">' +
+                    '<span class="dropdown-item-text small text-muted">' + $('<div>').text(email).html() + '</span>' +
+                    '<div class="dropdown-divider"></div>' +
+                    '<a class="dropdown-item" href="index.php?page=my_bookings"><i class="fa fa-history mr-1"></i> My Bookings</a>' +
+                    '<div class="dropdown-divider"></div>' +
+                    '<a class="dropdown-item" href="javascript:void(0)" onclick="userLogout()"><i class="fa fa-sign-out-alt mr-1"></i> Logout</a>' +
+                    '</div>' +
+                    '</li>'
+                );
             }
         }
 
-        // Check if user session active, then run action or show login
+        function userLogout() {
+            start_load();
+            $.post('user_auth.php', {action:'user_logout'}, function(){
+                end_load();
+                location.reload();
+            });
+        }
+
         function requireLogin(action) {
+            start_load();
             $.post('user_auth.php', {action:'check_login'}, function(resp){
-                var r = JSON.parse(resp);
-                if(r.status == 1) {
-                    action(); // already logged in
-                } else {
+                end_load();
+                try {
+                    var r = JSON.parse(resp);
+                    if(r.status == 1) {
+                        action();
+                    } else {
+                        _pendingAction = action;
+                        uni_modal('Sign In to Continue', 'user_auth.php');
+                    }
+                } catch(e) {
                     _pendingAction = action;
                     uni_modal('Sign In to Continue', 'user_auth.php');
                 }
             });
         }
 
-        // Re-render Google buttons whenever the auth modal opens
-        $(document).on('shown.bs.modal', '#uni_modal', function() {
-            ['google_login_btn','google_signup_btn','google_signin_btn'].forEach(function(cid){
+        function renderGoogleAuthButtons() {
+            var btnIds = ['google_login_btn','google_signup_btn','google_signin_btn'];
+            btnIds.forEach(function(cid){
                 var el = document.getElementById(cid);
-                if(el && typeof google !== 'undefined' && google.accounts){
-                    el.innerHTML = '';
-                    google.accounts.id.initialize({
-                        client_id:'403671615206-8glqf2te5i5e04eqh1s5s1rtruhflq7s.apps.googleusercontent.com',
-                        callback: handleGoogleAuth
-                    });
-                    google.accounts.id.renderButton(el,{
-                        type:'standard', shape:'rectangular', theme:'outline',
-                        text:'signin_with', size:'large', logo_alignment:'left', width:300
-                    });
+                if(el){
+                    if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
+                        el.innerHTML = '';
+                        google.accounts.id.initialize({
+                            client_id:'403671615206-8glqf2te5i5e04eqh1s5s1rtruhflq7s.apps.googleusercontent.com',
+                            callback: handleGoogleAuth
+                        });
+                        var btnW = el.offsetWidth > 150 ? el.offsetWidth : 280;
+                        google.accounts.id.renderButton(el,{
+                            type:'standard', shape:'rectangular', theme:'outline',
+                            text:'signin_with', size:'large', logo_alignment:'left', width: btnW
+                        });
+                    } else {
+                        setTimeout(renderGoogleAuthButtons, 300);
+                    }
                 }
             });
+        }
+
+        $(document).on('shown.bs.modal', '#uni_modal', function() {
+            renderGoogleAuthButtons();
         });
         </script>
-
-

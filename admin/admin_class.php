@@ -199,6 +199,10 @@ Class Action {
 		$data .= ", contact = '$contact' ";
 		$data .= ", datetime = '$schedule' ";
 		$data .= ", duration = '$duration' ";
+		if(isset($description))
+			$data .= ", description = '".htmlentities(str_replace("'","&#x2019;",$description))."' ";
+		if(isset($user_id) && !empty($user_id))
+			$data .= ", user_id = '$user_id' ";
 		if(isset($status))
 		$data .= ", status = '$status' ";
 		if(empty($id)){

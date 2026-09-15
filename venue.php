@@ -81,36 +81,53 @@ header.masthead,header.masthead:before {
                             <?php ?>
                               <div class="carousel-inner">
                               
-                                    <?php 
-                                        $images = array();
-                                        $fpath = 'admin/assets/uploads/venue_'.$row['id'];
-                                        $images= scandir($fpath);
-                                        $i = 1;
-                                        foreach($images as $k => $v):
-                                            if(!in_array($v,array('.','..'))):
-                                                $active = $i == 1 ? 'active' : '';
-                                            
-                                    ?>
-                                         <div class="carousel-item <?php echo $active ?>">
-                                          <img class="d-block w-100" src="<?php echo $fpath.'/'.$v ?>" alt="">
-                                        </div>
-                                    <?php
-                                            $i++;
-                                            else:
-                                                unset($images[$v]);
-                                            endif;
-                                        endforeach;
-                                    ?>
-                                     <a class="carousel-control-prev" href="#imagesCarousel_<?php echo $row['id'] ?>" role="button" data-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                        <span class="sr-only">Previous</span>
-                                      </a>
-                                      <a class="carousel-control-next" href="#imagesCarousel_<?php echo $row['id'] ?>" role="button" data-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                        <span class="sr-only">Next</span>
-                                      </a>
-                                        </div>
-                                    </div>
+                                     <?php 
+                                         $images = array();
+                                         $fpath = 'admin/assets/uploads/venue_'.$row['id'];
+                                         if(is_dir($fpath)) {
+                                             $scan = scandir($fpath);
+                                             foreach($scan as $v) {
+                                                 if(!in_array($v, array('.','..'))) {
+                                                     $images[] = $fpath.'/'.$v;
+                                                 }
+                                             }
+                                         }
+                                         if(empty($images)) {
+                                             $fallbackList = [
+                                                 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
+                                                 'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=800&q=80'
+                                             ];
+                                             $fbIdx = ($row['id'] - 1) % count($fallbackList);
+                                             $images[] = $fallbackList[$fbIdx];
+                                         }
+
+                                         $i = 1;
+                                         foreach($images as $imgSrc):
+                                             $active = $i == 1 ? 'active' : '';
+                                     ?>
+                                          <div class="carousel-item <?php echo $active ?>">
+                                           <img class="d-block w-100" src="<?php echo $imgSrc ?>" alt="<?php echo htmlspecialchars($row['venue']) ?>">
+                                         </div>
+                                     <?php
+                                             $i++;
+                                         endforeach;
+                                     ?>
+                                      <a class="carousel-control-prev" href="#imagesCarousel_<?php echo $row['id'] ?>" role="button" data-slide="prev">
+                                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                         <span class="sr-only">Previous</span>
+                                       </a>
+                                       <a class="carousel-control-next" href="#imagesCarousel_<?php echo $row['id'] ?>" role="button" data-slide="next">
+                                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                         <span class="sr-only">Next</span>
+                                       </a>
+                                         </div>
+                                     </div>
                     <div class="card-body">
                         <div class="row align-items-center justify-content-center text-center h-100">
                             <div class="">
@@ -124,7 +141,7 @@ header.masthead,header.masthead:before {
                                 <span class="badge badge-secondary"><i class="fa fa-tag"></i> Rate Per Hour: <?php echo number_format($row['rate'],2) ?></span>
                                 <br>
                                 <br>
-                                <button class="btn btn-primary book-venue align-self-end" type="button" data-id='<?php echo $row['id'] ?>'>Book</button>
+                                <button class="btn btn-primary book-venue align-self-end" type="button" data-id='<?php echo $row['id'] ?>'>Book Now</button>
                                 </div>
                             </div>
                         </div>

@@ -34,6 +34,7 @@
             if(resp){
                 $('#uni_modal .modal-title').html($title)
                 $('#uni_modal .modal-body').html(resp)
+                $('#uni_modal .modal-footer').show()
                 if($size != ''){
                     $('#uni_modal .modal-dialog').addClass($size)
                 }else{

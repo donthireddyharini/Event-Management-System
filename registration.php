@@ -1,3 +1,10 @@
+<?php
+if(!isset($_SESSION)) {
+    session_start();
+}
+$r_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : (isset($name) ? $name : '');
+$r_email = isset($_SESSION['user_email']) ? $_SESSION['user_email'] : (isset($email) ? $email : '');
+?>
 <div class="container-fluid">
 	<form action="" id="manage-register">
 		<input type="hidden" name="id" value="<?php echo isset($id) ? $id :'' ?>">
@@ -11,7 +18,7 @@
 
 		<div class="form-group">
 			<label for="" class="control-label">Full Name</label>
-			<input type="text" class="form-control" id="reg_name" name="name" value="<?php echo isset($name) ? $name :'' ?>" required>
+			<input type="text" class="form-control" id="reg_name" name="name" value="<?php echo htmlspecialchars($r_name) ?>" required>
 		</div>
 		<div class="form-group">
 			<label for="" class="control-label">Address</label>
@@ -19,7 +26,7 @@
 		</div>
 		<div class="form-group">
 			<label for="" class="control-label">Email</label>
-			<input type="email" class="form-control" id="reg_email" name="email" value="<?php echo isset($email) ? $email :'' ?>" required>
+			<input type="email" class="form-control" id="reg_email" name="email" value="<?php echo htmlspecialchars($r_email) ?>" required>
 		</div>
 		<div class="form-group">
 			<label for="" class="control-label">Contact #</label>

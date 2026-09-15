@@ -70,8 +70,28 @@
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="index.php?page=home">Home</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="index.php?page=venue">Venues</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="index.php?page=about">About</a></li>
-                        
-                     
+                        <span id="nav_user_container" style="display:flex;">
+                        <?php if(isset($_SESSION['user_id'])): ?>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="userNavDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-user-circle mr-1"></i> <?php echo htmlspecialchars($_SESSION['user_name']) ?>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userNavDropdown">
+                                    <span class="dropdown-item-text small text-muted"><?php echo htmlspecialchars($_SESSION['user_email']) ?></span>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="index.php?page=my_bookings"><i class="fa fa-history mr-1"></i> My Bookings</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="javascript:void(0)" onclick="userLogout()"><i class="fa fa-sign-out-alt mr-1"></i> Logout</a>
+                                </div>
+                            </li>
+                        <?php else: ?>
+                            <li class="nav-item">
+                                <a class="nav-link js-scroll-trigger" href="javascript:void(0)" onclick="uni_modal('Sign In to Continue', 'user_auth.php')">
+                                    <i class="fa fa-user mr-1"></i> Sign In
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        </span>
                     </ul>
                 </div>
             </div>
@@ -79,7 +99,7 @@
        
         <?php 
         // Whitelist of allowed pages to prevent Local File Inclusion attacks
-        $allowed_pages = ['home', 'venue', 'about', 'booking', 'registration', 'view_event', 'view_art', 'book_msg', 'register_msg'];
+        $allowed_pages = ['home', 'venue', 'about', 'booking', 'registration', 'view_event', 'view_art', 'book_msg', 'register_msg', 'user_auth', 'my_bookings', 'submit_review'];
         $page = isset($_GET['page']) ? $_GET['page'] : "home";
         if (!in_array($page, $allowed_pages)) {
             $page = "home";
