@@ -148,7 +148,10 @@ foreach($qry->fetch_array() as $k => $val){
 	$('#imagesCarousel img,#banner img').click(function(){
 		viewer_modal($(this).attr('src'))
 	})
-	 $('#register').click(function(){
-        uni_modal("Submit Registration Request","registration.php?event_id=<?php echo $id ?>")
+	$('#register').click(function(){
+        var eid = '<?php echo $id ?>';
+        requireLogin(function(){
+            uni_modal("Submit Registration Request","registration.php?event_id="+eid);
+        });
     })
 </script>

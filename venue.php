@@ -142,11 +142,11 @@ header.masthead,header.masthead:before {
 
 
 <script>
-    // $('.card.venue-list').click(function(){
-    //     location.href = "index.php?page=view_venue&id="+$(this).attr('data-id')
-    // })
     $('.book-venue').click(function(){
-        uni_modal("Submit Booking Request","booking.php?venue_id="+$(this).attr('data-id'))
+        var vid = $(this).attr('data-id');
+        requireLogin(function(){
+            uni_modal("Submit Booking Request","booking.php?venue_id="+vid);
+        });
     })
     $('.venue-list .carousel img').click(function(){
         viewer_modal($(this).attr('src'))

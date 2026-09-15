@@ -78,7 +78,12 @@
         </nav>
        
         <?php 
-        $page = isset($_GET['page']) ?$_GET['page'] : "home";
+        // Whitelist of allowed pages to prevent Local File Inclusion attacks
+        $allowed_pages = ['home', 'venue', 'about', 'booking', 'registration', 'view_event', 'view_art', 'book_msg', 'register_msg'];
+        $page = isset($_GET['page']) ? $_GET['page'] : "home";
+        if (!in_array($page, $allowed_pages)) {
+            $page = "home";
+        }
         include $page.'.php';
         ?>
        
@@ -158,7 +163,7 @@
                 </div>
             </div>
             <br>
-            <div class="container"><div class="small text-center text-muted">Copyright © 2020 - <?php echo $_SESSION['system']['name'] ?> | <a href="https://www.sourcecodester.com/" target="_blank">Sourcecodester</a></div></div>
+            <div class="container"><div class="small text-center text-muted">Copyright &copy; <?php echo date('Y') ?> - <?php echo $_SESSION['system']['name'] ?> | Donthireddy Harini</div></div>
         </footer>
         
        <?php include('footer.php') ?>

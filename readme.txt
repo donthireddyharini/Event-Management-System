@@ -22,11 +22,13 @@ FIRST Download
 
 7.Run the script http://localhost/Event_Management_System
 
-admin page:
-http://localhost/Event_Management_System/Event_Management_System/admin/login.php
+Homepage: http://eventmanagementsystem.site.je/
 
-Home page:
-http://localhost/Event_Management_System/Event_Management_System/
+Admin Login: http://eventmanagementsystem.site.je/admin/login.php
+
+Username: admin 
+
+ Password: admin123
 
 
 **LOGIN DETAILS** 
